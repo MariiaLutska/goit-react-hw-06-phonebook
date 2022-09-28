@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { nanoid } from 'nanoid';
+import { useSelector, useDispatch } from 'react-redux';
+import { setContact } from '../../redux/contactsSlice';
 import { Box } from '../Box';
-import { Button } from './Button.styled';
+import { ContactButton } from "../Button/Button";
 
-let inputNameId = nanoid();
-let inputTelId = nanoid();
+let nameId = nanoid();
+let numbId = nanoid();
 
-export function ContactForm({ onSubmit }) {
+export function ContactForm() {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
   const [id, setId] = useState('');
+  const contacts = useSelector(state => state.contactsSlice.contacts.items);
+  const dispatch = useDispatch();
 
   const handleInputChange = e => {
     const { name, value } = e.target;
@@ -24,9 +28,17 @@ export function ContactForm({ onSubmit }) {
 
   const handleSubmit = e => {
     e.preventDefault();
-    let contactsData = { name, number, id };
+    let data = { name, number, id };
+    let findName = contacts.find(
+      item => item.name.toLowerCase() === data.name.toLowerCase()
+    );
 
-    onSubmit(contactsData);
+    if (findName) {
+      return alert(`${data.name} is already in contact`);
+    } else {
+      dispatch(setContact(data));
+    }
+
     reset();
   };
 
@@ -37,38 +49,49 @@ export function ContactForm({ onSubmit }) {
   };
 
   return (
-    <Box display="flex">
+<Box display="flex">
       <form onSubmit={handleSubmit}>
-        <Box display="flex" flexDirection="column">
-          <label htmlFor={inputNameId}>Name:</label>
+        <Box display="flex"
+          flexDirection="column" >
+          <label
+            htmlFor={nameId}
+          >
+            Name:
+          </label>
           <input
-            onInput={handleInputChange}
-            value={name}
-            type="text"
-            name="name"
-            pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-            title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-            required
-            id={inputNameId}
-          />
+          onInput={handleInputChange}
+          value={name}
+          type="text"
+          name="name"
+          pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
+          title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
+          required
+          id={nameId}
+        />
           {/* <ErrorMessage name="name" component="div" /> */}
-
-          <label htmlFor={inputTelId}>Number:</label>
-          <input
-            onInput={handleInputChange}
-            value={number}
-            type="tel"
-            name="number"
-            pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-            title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-            required
-            id={inputTelId}
-          />
+                
+          <label
+            htmlFor={numbId}
+          >
+            Number:
+          </label>
+         <input
+          onInput={handleInputChange}
+          value={number}
+          type="tel"
+          name="number"
+          pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
+          title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
+          required
+          id={numbId}
+        />
           {/* <ErrorMessage name="number" component="div" /> */}
-
-          <Button type="submit">Add contact</Button>
+                
+          <ContactButton type="submit">
+            Add contact
+          </ContactButton>
         </Box>
       </form>
     </Box>
   );
-}
+};
